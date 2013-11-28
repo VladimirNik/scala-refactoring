@@ -6,6 +6,7 @@ package scala.tools.refactoring
 package sourcegen
 
 import scala.reflect.internal.util.BatchSourceFile
+import scala.sprinter.printers.TypePrinters
 
 trait CommonPrintUtils {
 
@@ -22,16 +23,33 @@ trait CommonPrintUtils {
   def indentation(implicit ctx: PrintingContext) = ctx.ind.current
 
   def typeToString(tree: TypeTree, t: Type)(implicit ctx: PrintingContext): String = {
+    //TODO fix to get context
+    def removePrefixes(tp: Type, defaultAction: => String): String = defaultAction 
+//    {
+//      import scala.tools.nsc.interactive.Global
+//      if (global.isInstanceOf[Global] && !tree.isEmpty && tree.pos.isRange && tree.pos.isDefined) {
+//        val compiler = global.asInstanceOf[Global]
+//        val response = compiler.askForResponse { () =>
+//          val typePrinter = TypePrinters(compiler)
+//          val typePrinterContext = compiler.doLocateContext(global.rangePos(tree.pos.source, tree.pos.start, tree.pos.start, tree.pos.start))
+//          typePrinter.showType(tp, typePrinterContext)
+//        }
+//        response.get.left.toOption flatMap {
+//          case strType: String => Option(strType)
+//          case _ => None
+//        } getOrElse (defaultAction)
+//      } else defaultAction
+//    }
     t match {
       case tpe if tpe == EmptyTree.tpe => ""
       case tpe: ConstantType =>
         tpe.typeSymbol.tpe.toString
       case tpe: TypeRef if tree.original != null && tpe.sym.nameString.matches("Tuple\\d+") =>
-        tpe.toString
+        removePrefixes(tpe, tpe.toString)
       case tpe if tree.original != null && !tpe.isInstanceOf[TypeRef] =>
         print(tree.original, ctx).asText
       case tpe: RefinedType =>
-        tpe.typeSymbol.tpe.toString
+        removePrefixes(tpe.typeSymbol.tpe, tpe.typeSymbol.tpe.toString)
       case typeRef @ TypeRef(_, _, arg1 :: ret :: Nil) if definitions.isFunctionType(typeRef) =>
         typeToString(tree, arg1) + " => " + typeToString(tree, ret)
       case MethodType(params, result) =>
@@ -47,7 +65,7 @@ trait CommonPrintUtils {
         }
 
       case tpe =>
-        tpe.toString
+        removePrefixes(tpe, tpe.toString)
     }
   }
 

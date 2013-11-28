@@ -4,6 +4,7 @@ package implementations
 import common.Change
 import scala.tools.refactoring.common.PimpedTrees
 import scala.tools.refactoring.transformation.TreeFactory
+import scala.sprinter.printers.TypePrinters
 
 /**
  * Refactoring that implements the ProductN trait for a class.
@@ -37,8 +38,16 @@ abstract class IntroduceProductNTrait extends GenerateHashcodeAndEquals {
   }
 
   override def newParentNames(classDef: ClassDef, selectedParams: List[ValDef]) = {
+    val typePrinter = TypePrinters(global)
+    val response = global.askForResponse { () =>
+      val typePrinterContext = global.doLocateContext(global.rangePos(classDef.pos.source, classDef.pos.start, classDef.pos.start, classDef.pos.start))
+      selectedParams.map(v => typePrinter.showType(v.tpt, typePrinterContext)) //v.tpt.nameString
+    }
+    val paramsTypenames = response.get.left.toOption flatMap {
+          case list: List[String] => Option(list)
+          case _ => None
+        } getOrElse (selectedParams.map(v => v.tpt.nameString))
     val arity = selectedParams.length
-    val paramsTypenames = selectedParams.map(v => v.tpt.nameString)
     val productParent = "Product" + arity + "[" + paramsTypenames.mkString(", ") + "]"
     productParent::Nil
   }
