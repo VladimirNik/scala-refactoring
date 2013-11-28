@@ -7,6 +7,6 @@
 	<classpathentry kind="src" path="src/main/scala"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="src" path="src/test/scala"/>
-
+    <classpathentry kind="lib" path="target/lib/sprinter_2.10-0.2.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

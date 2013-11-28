@@ -12,7 +12,8 @@ Export-Package: scala.tools.refactoring,
  scala.tools.refactoring.sourcegen,
  scala.tools.refactoring.transformation,
  scala.tools.refactoring.util
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ target/lib/sprinter_2.10-0.2.0.jar
 Import-Package: scala.reflect.internal;resolution:=optional,
  scala.reflect.internal.util;resolution:=optional,
  scala.reflect.api;resolution:=optional,

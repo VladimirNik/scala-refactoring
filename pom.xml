@@ -70,6 +70,13 @@
       <artifactId>scala-compiler</artifactId>
       <version>${scala.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>sprinter_2.10</artifactId>
+      <version>0.2.0</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
