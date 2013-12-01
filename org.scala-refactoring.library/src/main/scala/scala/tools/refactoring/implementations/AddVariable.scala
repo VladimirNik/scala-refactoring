@@ -4,8 +4,8 @@ package implementations
 import scala.tools.nsc.io.AbstractFile
 import scala.tools.refactoring.Refactoring
 import scala.tools.refactoring.common.TextChange
-
 import common.InteractiveScalaCompiler
+import scala.reflect.internal.Flags
 
 abstract class AddVariable extends Refactoring with InteractiveScalaCompiler {
 
@@ -13,7 +13,7 @@ abstract class AddVariable extends Refactoring with InteractiveScalaCompiler {
   import global._
 
   //TODO implement isVal
-  def addVariable(file: AbstractFile, className: String, varName: String, isVal: Boolean, returnTypeOpt: Option[String], target: AddMethodTarget): List[TextChange] = {
+  def addVariable(file: AbstractFile, className: String, varName: String, isVar: Boolean, returnTypeOpt: Option[String], target: AddMethodTarget): List[TextChange] = {
     val astRoot = abstractFileToTree(file)
 
     val classOrObjectDef = target match {
@@ -39,14 +39,18 @@ abstract class AddVariable extends Refactoring with InteractiveScalaCompiler {
       }
     }
 
-    addVariable(varName, isVal, returnTypeOpt, classOrObjectDef.get)
+    addVariable(varName, isVar, returnTypeOpt, classOrObjectDef.get)
   }
 
-  private def addVariable(varName: String, isVal: Boolean, returnTypeOpt: Option[String], classOrObjectDef: Tree): List[TextChange] = {
+  private def addVariable(varName: String, isVar: Boolean, returnTypeOpt: Option[String], classOrObjectDef: Tree): List[TextChange] = {
 
-    val returnStatement = Ident("???") :: Nil
-    val newValOrVar = mkValDef(varName, mkBlock(returnStatement), returnTypeOpt.map(name => TypeTree(newType(name))).getOrElse(TypeTree(newType("Any"))))
-
+//    val returnStatement = Ident("???") :: Nil
+//    val newValOrVar = mkValDef(varName, mkBlock(returnStatement), returnTypeOpt.map(name => TypeTree(newType(name))).getOrElse(TypeTree(newType("Any"))))
+    
+    val returnStatement = Ident("???")
+//    val mutFlag = if (isVar) Flags.MUTABLE else 0L
+    val newValOrVar = mkValDef(varName, returnStatement, returnTypeOpt.map(name => TypeTree(newType(name))).getOrElse(TypeTree(newType("Any")))) //.mods | mutFlag
+   
     def addVariableToTemplate(tpl: Template) = tpl copy (body = tpl.body ::: newValOrVar :: Nil) replaces tpl
 
     val insertVariable = transform {
